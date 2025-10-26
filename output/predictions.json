@@ -1,4 +1,9 @@
 {
-  "timestamp": "2025-10-27T06:45:34.066946",
-  "predicted_action": "toilet"
+  "predicted_action": "none",
+  "probs": {
+    "sleep": 0.2649169000871908,
+    "meal": 0.24091791546403754,
+    "toilet": 0.25601781114263183,
+    "out": 0.23814737330613983
+  }
 }

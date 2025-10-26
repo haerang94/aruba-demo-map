@@ -5,29 +5,43 @@
   "infinite": false,
   "layers": [
     {
-      "type": "tilelayer",
+      "type": "imagelayer",
       "name": "icon_sleep",
+      "visible": false,
       "opacity": 1,
-      "visible": true,
-      "x": 0,
-      "y": 0,
-      "width": 10,
-      "height": 10,
-      "data": [
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,2,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0
-      ]
+      "image": "../assets/icons/sleep.png",
+      "x": 160,
+      "y": 224
+    },
+    {
+      "type": "imagelayer",
+      "name": "icon_meal",
+      "visible": false,
+      "opacity": 1,
+      "image": "../assets/icons/meal.png",
+      "x": 256,
+      "y": 128
+    },
+    {
+      "type": "imagelayer",
+      "name": "icon_toilet",
+      "visible": false,
+      "opacity": 1,
+      "image": "../assets/icons/toilet.png",
+      "x": 96,
+      "y": 288
+    },
+    {
+      "type": "imagelayer",
+      "name": "icon_out",
+      "visible": false,
+      "opacity": 1,
+      "image": "../assets/icons/out.png",
+      "x": 32,
+      "y": 32
     }
   ],
-  "nextlayerid": 2,
+  "nextlayerid": 5,
   "nextobjectid": 1,
   "orientation": "orthogonal",
   "properties": [
@@ -41,19 +55,7 @@
   "tiledversion": "1.10.2",
   "tileheight": 32,
   "tilewidth": 32,
-  "tilesets": [
-    {
-      "firstgid": 1,
-      "name": "icons",
-      "image": "../assets/icons/icons_2x2.png",
-      "imagewidth": 64,
-      "imageheight": 64,
-      "tilewidth": 32,
-      "tileheight": 32,
-      "tilecount": 4,
-      "columns": 2
-    }
-  ],
+  "tilesets": [],
   "type": "map",
   "version": "1.10"
 }

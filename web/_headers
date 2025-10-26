@@ -5,9 +5,15 @@
 
 /web/maps/plugins/*
   Content-Type: application/javascript; charset=utf-8
-  Access-Control-Allow-Origin: https://play.workadventu.re
+  Access-Control-Allow-Origin: *
+  Cross-Origin-Resource-Policy: cross-origin
+  Cache-Control: public, max-age=60
 
 /web/output/*
   Content-Type: application/json; charset=utf-8
   Access-Control-Allow-Origin: https://play.workadventu.re
   Cache-Control: no-cache
+
+/web/assets/*
+  Access-Control-Allow-Origin: https://play.workadventu.re
+  Cache-Control: public, max-age=3600, immutable

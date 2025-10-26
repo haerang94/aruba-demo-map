@@ -9,3 +9,21 @@
 1) 기존 파이프라인대로 `train_gru.py`, `predict.py`, `convert_to_wa.py` 실행
 2) 생긴 `web/output/wa_events.json` 포함하여 `/web` 폴더를 Netlify에 배포
 3) WA에서 `https://play.workadventu.re/_/global/adventuretestfordemo.netlify.app/web/maps/aruba.json?nocache=1` 열기
+
+# Aruba Timeline Animated (GRU-based)
+
+## Run locally
+pip install torch pandas numpy scikit-learn joblib pillow
+python model/train_gru.py
+python model/predict.py
+python model/convert_to_wa.py   # writes web/output/wa_events.json
+
+## Deploy
+Upload the /web folder to Netlify.
+Open:
+https://play.workadventu.re/_/global/adventuretestfordemo.netlify.app/web/maps/aruba.json?nocache=300
+
+## Notes
+- Icons must exist at /web/assets/icons/{sleep,meal,toilet,out}.png
+- The plugin cycles through timeline every 10s and shows probabilities in an overlay.
+- The plugin re-fetches timeline every 60s to pick up new predictions.
