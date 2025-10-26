@@ -115,9 +115,45 @@
       "width": 10,
       "x": 0,
       "y": 0
+    },
+    {
+      "type": "imagelayer",
+      "name": "icon_sleep",
+      "visible": false,
+      "opacity": 1,
+      "image": "../assets/icons/sleep.png",
+      "x": 160,
+      "y": 224
+    },
+    {
+      "type": "imagelayer",
+      "name": "icon_meal",
+      "visible": false,
+      "opacity": 1,
+      "image": "../assets/icons/meal.png",
+      "x": 256,
+      "y": 128
+    },
+    {
+      "type": "imagelayer",
+      "name": "icon_toilet",
+      "visible": false,
+      "opacity": 1,
+      "image": "../assets/icons/toilet.png",
+      "x": 96,
+      "y": 288
+    },
+    {
+      "type": "imagelayer",
+      "name": "icon_out",
+      "visible": false,
+      "opacity": 1,
+      "image": "../assets/icons/out.png",
+      "x": 32,
+      "y": 32
     }
   ],
-  "nextlayerid": 2,
+  "nextlayerid": 6,
   "nextobjectid": 1,
   "orientation": "orthogonal",
   "properties": [
@@ -130,18 +166,7 @@
   "renderorder": "right-down",
   "tiledversion": "1.10.2",
   "tileheight": 32,
-  "tilesets": [
-    {
-      "columns": 8,
-      "firstgid": 1,
-      "image": "../assets/tiles/overworld_part1.png",
-      "imageheight": 128,
-      "imagewidth": 256,
-      "tilecount": 32,
-      "tileheight": 32,
-      "tilewidth": 32
-    }
-  ],
+  "tilesets": [],
   "tilewidth": 32,
   "type": "map",
   "version": "1.10"

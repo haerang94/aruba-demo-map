@@ -1,0 +1,10 @@
+{
+  "event": "behavior_prediction",
+  "timestamp": "2025-10-27T05:30:56.237879",
+  "action": "meal",
+  "visual": {
+    "x": 8,
+    "y": 4,
+    "icon": "meal.png"
+  }
+}
