@@ -1,5 +1,5 @@
 
-console.log("Aruba plugin (imagelayer fix) loaded");
+console.log("Aruba plugin (icons on white circles) loaded");
 const layerMap = { sleep: "icon_sleep", meal: "icon_meal", toilet: "icon_toilet", out: "icon_out" };
 
 function updateFromJSON() {

@@ -1,8 +1,18 @@
 {
   "compressionlevel": -1,
   "height": 10,
+  "width": 10,
   "infinite": false,
   "layers": [
+    {
+      "type": "imagelayer",
+      "name": "background",
+      "visible": true,
+      "opacity": 1,
+      "image": "../assets/bg.png",
+      "x": 0,
+      "y": 0
+    },
     {
       "type": "imagelayer",
       "name": "icon_sleep",
@@ -40,7 +50,7 @@
       "y": 32
     }
   ],
-  "nextlayerid": 5,
+  "nextlayerid": 6,
   "nextobjectid": 1,
   "orientation": "orthogonal",
   "properties": [
@@ -56,6 +66,5 @@
   "tilesets": [],
   "tilewidth": 32,
   "type": "map",
-  "version": "1.10",
-  "width": 10
+  "version": "1.10"
 }
