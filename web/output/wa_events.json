@@ -1,10 +1,52 @@
 {
-  "event": "behavior_prediction",
-  "timestamp": "2025-10-27T05:56:08.747834",
-  "action": "none",
-  "visual": {
-    "x": 0,
-    "y": 0,
-    "icon": "out.png"
-  }
+  "timeline": [
+    {
+      "time": "06:45",
+      "action": "toilet"
+    },
+    {
+      "time": "06:55",
+      "action": "meal"
+    },
+    {
+      "time": "07:05",
+      "action": "out"
+    },
+    {
+      "time": "07:15",
+      "action": "sleep"
+    },
+    {
+      "time": "07:25",
+      "action": "toilet"
+    },
+    {
+      "time": "07:35",
+      "action": "meal"
+    },
+    {
+      "time": "07:45",
+      "action": "out"
+    },
+    {
+      "time": "07:55",
+      "action": "sleep"
+    },
+    {
+      "time": "08:05",
+      "action": "toilet"
+    },
+    {
+      "time": "08:15",
+      "action": "meal"
+    },
+    {
+      "time": "08:25",
+      "action": "out"
+    },
+    {
+      "time": "08:35",
+      "action": "sleep"
+    }
+  ]
 }
