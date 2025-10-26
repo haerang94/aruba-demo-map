@@ -1,0 +1,9 @@
+{
+  "times": ["08:00","08:02","08:04","08:06"],
+  "sensors": [
+    {"id":"bedroom_motion","series":[0,1,0,0]},
+    {"id":"bathroom_light","series":[0,0,0,1]},
+    {"id":"kitchen_temp","series":[0.8,0.9,0.7,0.6]},
+    {"id":"entry_door","series":[0,0,1,0]}
+  ]
+}

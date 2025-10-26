@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Aruba Demo — pred.json Driven</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { --stage-w: 1280px; --stage-h: 720px; }
+  html, body { margin:0; padding:0; width:100%; height:100%; background:#0b1628; color:#fff; overflow:hidden; font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+
+  /* 상단 컨트롤바 */
+  #controls {
+    position:fixed; left:0; right:0; top:0; z-index:1000;
+    display:flex; gap:10px; align-items:center; padding:10px 14px;
+    background:linear-gradient(180deg,rgba(0,0,0,.7),rgba(0,0,0,.35)); backdrop-filter:blur(6px);
+  }
+  #playBtn { padding:6px 12px; border-radius:8px; border:0; cursor:pointer; background:#21c7ff; color:#001018; font-weight:700; }
+  #slider { flex:1; accent-color:#21c7ff; }
+  #timeLabel { min-width:120px; opacity:.9; text-align:center; }
+  #speed { border:0; border-radius:8px; padding:6px 10px; background:#16243c; color:#cfe8ff; }
+
+  /* HUD */
+  #hud {
+    position:fixed; right:10px; top:56px; z-index:900;
+    background:rgba(0,0,0,.55); padding:8px 10px; border-radius:8px; font:14px/1.35 monospace;
+    transition:opacity .25s ease;
+  }
+
+  /* 스테이지 */
+  #stageWrap { position:absolute; inset:0; display:grid; place-items:center; }
+  #stage { position:relative; width:var(--stage-w); height:var(--stage-h); transform-origin:top left; box-shadow:0 10px 40px rgba(0,0,0,.45); }
+  #bg { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; opacity:.96; border-radius:6px; background:#071020; }
+
+  .sensor { position:absolute; width:64px; height:64px; opacity:.35; transition:transform .25s, opacity .25s, filter .25s; filter:drop-shadow(0 0 5px #00ffffaa); cursor:pointer; }
+  .sensor.active { opacity:1; animation:blink .7s ease-in-out infinite alternate; transform:scale(1.15); filter:drop-shadow(0 0 12px #26e0ffaa); }
+  @keyframes blink { from { filter:brightness(.9) drop-shadow(0 0 6px #26e0ffaa);} to { filter:brightness(1.4) drop-shadow(0 0 14px #26e0ff);} }
+
+  /* 팝업 */
+  #modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:2000; }
+  #dialog { width:min(92vw,760px); background:#0e1c32; border:1px solid #27466d; border-radius:12px; box-shadow:0 20px 70px rgba(0,0,0,.6); padding:14px; color:#d9f0ff; }
+  #dialogHeader { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+  #dialogTitle { font-weight:700; }
+  #closeBtn { border:0; background:#203654; color:#cfe8ff; border-radius:8px; padding:6px 10px; cursor:pointer; }
+  #chart { width:100%; height:320px; background:#0a1729; border-radius:8px; }
+
+  /* 도움말 */
+  #legend { position:fixed; left:10px; bottom:10px; color:#b7cde4; background:rgba(0,0,0,.4); padding:6px 8px; border-radius:6px; font:12px/1.35 monospace; }
+</style>
+</head>
+<body>
+  <!-- 상단 컨트롤 -->
+  <div id="controls">
+    <button id="playBtn">▶ 재생</button>
+    <input id="slider" type="range" min="0" max="0" value="0" />
+    <div id="timeLabel">--:--</div>
+    <label>속도
+      <select id="speed">
+        <option value="2000">x1 (2초/스텝)</option>
+        <option value="1000">x2 (1초/스텝)</option>
+        <option value="500">x4 (0.5초/스텝)</option>
+      </select>
+    </label>
+  </div>
+
+  <div id="hud">Loading...</div>
+
+  <!-- 스테이지 -->
+  <div id="stageWrap">
+    <div id="stage">
+      <img id="bg" src="./assets/house_bg.png" alt="background">
+
+      <!-- 방 고정 좌표의 센서/아이콘 (1280x720 기준) -->
+      <img id="bedroom_motion" class="sensor" src="./assets/sensors/motion.png" style="left:780px; top:440px;" alt="bedroom_motion" />
+      <img id="bathroom_light" class="sensor" src="./assets/sensors/light.png"  style="left:940px; top:280px;" alt="bathroom_light" />
+      <img id="kitchen_temp"  class="sensor" src="./assets/sensors/temp.png"   style="left:620px; top:260px;" alt="kitchen_temp" />
+      <img id="entry_door"    class="sensor" src="./assets/sensors/door.png"   style="left:330px; top:500px;" alt="entry_door" />
+
+      <!-- 행동 아이콘 4종 (필요 시 표시) -->
+      <img id="icon_sleep"  class="sensor" src="./assets/icons/sleep.png"  style="left:900px; top:560px;" alt="icon_sleep" />
+      <img id="icon_meal"   class="sensor" src="./assets/icons/meal.png"   style="left:600px; top:240px;" alt="icon_meal" />
+      <img id="icon_toilet" class="sensor" src="./assets/icons/toilet.png" style="left:900px; top:260px;" alt="icon_toilet" />
+      <img id="icon_out"    class="sensor" src="./assets/icons/out.png"    style="left:300px; top:460px;" alt="icon_out" />
+    </div>
+  </div>
+
+  <!-- 팝업 -->
+  <div id="modal">
+    <div id="dialog">
+      <div id="dialogHeader">
+        <div id="dialogTitle">Sensor</div>
+        <button id="closeBtn">닫기</button>
+      </div>
+      <canvas id="chart" width="1100" height="320"></canvas>
+    </div>
+  </div>
+
+  <div id="legend">⏯ 재생/정지 · 슬라이더로 시간 이동 · 센서 클릭 시 그래프 · <b>데이터:</b> web/output/pred.json</div>
+
+<script>
+(function(){
+  // ===== 상태 =====
+  const stage = document.getElementById('stage');
+  const stageWrap = document.getElementById('stageWrap');
+  const hud = document.getElementById('hud');
+  const playBtn = document.getElementById('playBtn');
+  const slider = document.getElementById('slider');
+  const timeLabel = document.getElementById('timeLabel');
+  const speedSel = document.getElementById('speed');
+
+  const sensors = {};
+  document.querySelectorAll('.sensor').forEach(el => sensors[el.id] = el);
+
+  const modal = document.getElementById('modal');
+  const dialogTitle = document.getElementById('dialogTitle');
+  const closeBtn = document.getElementById('closeBtn');
+  const chartCanvas = document.getElementById('chart');
+  const ctx = chartCanvas.getContext('2d');
+
+  let timeline = [];
+  let idx = 0;
+  let playing = false;
+  let timer = null;
+  let stepMs = Number(speedSel.value);
+
+  // ===== 스케일 조정(배경 안잘리게) =====
+  function fitStage() {
+    const vw = stageWrap.clientWidth;
+    const vh = stageWrap.clientHeight;
+    const sw = 1280, sh = 720;
+    const s = Math.min(vw / sw, vh / sh);
+    stage.style.transform = `scale(${s}) translateZ(0)`;
+  }
+  window.addEventListener('resize', fitStage);
+
+  // ===== pred.json → timeline 변환기(유연 파서) =====
+  function normalizeTimelineFromPred(json) {
+    // CASE 1: {timeline:[...]}
+    if (json && Array.isArray(json.timeline)) return json.timeline;
+
+    // CASE 2: 최상위 배열
+    if (Array.isArray(json)) return json;
+
+    // CASE 3: 단일 예측 {predicted_action, probs}
+    if (json && (json.predicted_action || json.probs)) {
+      const order = ["sleep","toilet","meal","out"];
+      const start = json.predicted_action && order.includes(json.predicted_action)
+        ? order.indexOf(json.predicted_action) : 0;
+      const now = new Date();
+      const steps = [];
+      for (let i=0;i<12;i++){
+        const t = new Date(now.getTime() + i*10*60000);
+        const hh = String(t.getHours()).padStart(2,'0');
+        const mm = String(t.getMinutes()).padStart(2,'0');
+        const action = order[(start+i)%order.length];
+        steps.push({ time:`${hh}:${mm}`, action, probs: json.probs || {} });
+      }
+      return steps;
+    }
+
+    // CASE 4: 센서 시계열 {times:[], sensors:[{id,series:[]}]}
+    if (json && Array.isArray(json.times) && Array.isArray(json.sensors)) {
+      const N = json.times.length;
+      const byTime = [];
+      for (let i=0;i<N;i++){
+        const sensorsObj = {};
+        for (const s of json.sensors) {
+          sensorsObj[s.id] = Number(s.series?.[i] ?? 0);
+        }
+        byTime.push({ time: json.times[i], sensors: sensorsObj });
+      }
+      return byTime;
+    }
+
+    // fallback: 빈 배열
+    return [];
+  }
+
+  async function loadPred() {
+    const url = './output/pred.json?ts=' + Date.now();
+    try {
+      const res = await fetch(url);
+      return await res.json();
+    } catch(e) {
+      console.warn('pred.json fetch failed:', e);
+      return null;
+    }
+  }
+
+  // ===== 렌더링 =====
+  function setActionIconsVisible(action) {
+    // 행동 아이콘 4개만 관리 (다른 센서와 분리)
+    ['icon_sleep','icon_meal','icon_toilet','icon_out'].forEach(id => {
+      const el = sensors[id]; if (!el) return;
+      el.style.opacity = 0.08; el.classList.remove('active');
+    });
+    if (!action) return;
+    const id = 'icon_' + action;
+    if (sensors[id]) { sensors[id].style.opacity = 1; sensors[id].classList.add('active'); }
+  }
+
+  function applyStep(step) {
+    // 일반 센서 표시
+    for (const id of Object.keys(sensors)) {
+      if (id.startsWith('icon_')) continue; // 행동 아이콘은 아래에서 처리
+      sensors[id].classList.remove('active');
+    }
+    const activeList = [];
+    if (step && step.sensors) {
+      for (const [id, v] of Object.entries(step.sensors)) {
+        if (sensors[id] && Number(v) > 0.5) {
+          sensors[id].classList.add('active');
+          activeList.push(`${id}:${Number(v).toFixed(2)}`);
+        }
+      }
+    }
+
+    // 행동 아이콘 처리
+    if (step && step.action) setActionIconsVisible(step.action);
+    else setActionIconsVisible(null);
+
+    // HUD: 확률/센서
+    const tt = step?.time || '--:--';
+    timeLabel.textContent = tt;
+
+    // 확률 줄
+    const probs = step?.probs || step?.prob || null; // prob 키도 허용
+    let probLine = '';
+    if (probs) {
+      const keys = ['sleep','meal','toilet','out'];
+      probLine = keys.map(k => {
+        const v = probs[k] !== undefined ? Number(probs[k]).toFixed(2) : '--';
+        const mark = (k === step.action) ? '◉' : '•';
+        return `${mark} ${k}:${v}`;
+      }).join('  ');
+    }
+
+    hud.style.opacity = 0;
+    setTimeout(()=>{
+      const sensorsText = activeList.length ? ` | Sensors: ${activeList.join('  ')}` : '';
+      const probsText = probLine ? ` | Probs: ${probLine}` : '';
+      hud.innerHTML = `<b>${tt}</b>${probsText}${sensorsText}`;
+      hud.style.opacity = 1;
+    }, 100);
+  }
+
+  function renderIndex(newIdx) {
+    if (!timeline.length) return;
+    idx = ((newIdx % timeline.length) + timeline.length) % timeline.length;
+    slider.value = String(idx);
+    applyStep(timeline[idx]);
+  }
+
+  // ===== 재생 =====
+  function startPlay() {
+    if (playing || !timeline.length) return;
+    playing = true;
+    playBtn.textContent = '⏸ 정지';
+    timer = setInterval(() => renderIndex(idx + 1), stepMs);
+  }
+  function stopPlay() {
+    playing = false;
+    playBtn.textContent = '▶ 재생';
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+  function togglePlay() { playing ? stopPlay() : startPlay(); }
+
+  // ===== 차트(센서 클릭) =====
+  const chartCtx = ctx;
+  function openChart(sensorId) {
+    dialogTitle.textContent = sensorId;
+    drawChart(sensorId);
+    modal.style.display = 'flex';
+  }
+  function closeChart() { modal.style.display = 'none'; }
+  function drawChart(sensorId) {
+    const w = chartCanvas.width, h = chartCanvas.height;
+    chartCtx.clearRect(0,0,w,h);
+    chartCtx.fillStyle = '#0a1729'; chartCtx.fillRect(0,0,w,h);
+    chartCtx.strokeStyle = '#2f4f6f'; chartCtx.lineWidth = 1;
+    chartCtx.beginPath(); chartCtx.moveTo(40, 10); chartCtx.lineTo(40, h-30); chartCtx.lineTo(w-10, h-30); chartCtx.stroke();
+
+    // 데이터
+    const vals = timeline.map(s => Number(s.sensors?.[sensorId] ?? 0));
+    const n = Math.max(1, vals.length), plotW = w - 60, plotH = h - 50;
+
+    // 수평 그리드
+    chartCtx.strokeStyle = '#16304b';
+    for (let i=0;i<=5;i++){
+      const y = 10 + (plotH*i/5);
+      chartCtx.beginPath(); chartCtx.moveTo(40, y); chartCtx.lineTo(w-10, y); chartCtx.stroke();
+    }
+
+    // 라인
+    chartCtx.strokeStyle = '#21c7ff'; chartCtx.lineWidth = 2; chartCtx.beginPath();
+    for (let i=0;i<n;i++){
+      const x = 40 + (plotW * i / Math.max(1,n-1));
+      const y = 10 + plotH * (1 - vals[i]);
+      if (i===0) chartCtx.moveTo(x,y); else chartCtx.lineTo(x,y);
+    }
+    chartCtx.stroke();
+
+    // 현재 인덱스 마커
+    const curX = 40 + (plotW * idx / Math.max(1,n-1));
+    chartCtx.strokeStyle = '#ffda6b'; chartCtx.lineWidth = 1.5;
+    chartCtx.beginPath(); chartCtx.moveTo(curX, 10); chartCtx.lineTo(curX, h-30); chartCtx.stroke();
+
+    chartCtx.fillStyle = '#cfe8ff'; chartCtx.font = '12px monospace';
+    chartCtx.fillText('value', 6, 20); chartCtx.fillText('time →', w-70, h-12);
+  }
+
+  for (const id in sensors) {
+    sensors[id].addEventListener('click', () => openChart(id));
+  }
+  document.getElementById('closeBtn').addEventListener('click', closeChart);
+  document.getElementById('modal').addEventListener('click', (e)=>{ if (e.target.id === 'modal') closeChart(); });
+
+  // 컨트롤 이벤트
+  playBtn.addEventListener('click', togglePlay);
+  slider.addEventListener('input', (e)=> { stopPlay(); renderIndex(Number(e.target.value)||0); });
+  speedSel.addEventListener('change', (e)=> { stepMs = Number(e.target.value)||2000; if (playing){ stopPlay(); startPlay(); } });
+
+  // ===== 초기화 =====
+  (async function init(){
+    fitStage();
+    const pred = await loadPred();
+    timeline = normalizeTimelineFromPred(pred);
+
+    if (!timeline.length) {
+      // pred.json이 없거나 형식 미일치면 데모 타임라인
+      timeline = [
+        { time:"08:00", action:"sleep",  probs:{sleep:1,meal:0,toilet:0,out:0}, sensors:{bedroom_motion:1} },
+        { time:"08:10", action:"meal",   probs:{sleep:0.2,meal:0.6,toilet:0.1,out:0.1}, sensors:{kitchen_temp:0.9} },
+        { time:"08:20", action:"toilet", probs:{sleep:0.2,meal:0.1,toilet:0.6,out:0.1}, sensors:{bathroom_light:1} },
+        { time:"08:30", action:"out",    probs:{sleep:0.1,meal:0.2,toilet:0.1,out:0.6}, sensors:{entry_door:1} },
+      ];
+    }
+
+    // 슬라이더/렌더
+    slider.max = String(timeline.length - 1);
+    slider.value = '0';
+    renderIndex(0);
+    // 자동 재생 시작
+    startPlay();
+
+    // 60초마다 pred.json 재로드 (선택 사항)
+    setInterval(async () => {
+      const fresh = await loadPred();
+      const t = normalizeTimelineFromPred(fresh);
+      if (t.length) { timeline = t; slider.max = String(timeline.length - 1); idx = 0; renderIndex(0); }
+    }, 60000);
+  })();
+})();
+</script>
+</body>
+</html>

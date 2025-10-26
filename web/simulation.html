@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Aruba Sensor Simulation — Controls & Charts</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --stage-w: 1280px; /* 설계 기준 폭 */
+    --stage-h: 720px;  /* 설계 기준 높이 */
+  }
+  html, body {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    background: #0b1628; color: #fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    overflow: hidden;
+  }
+  /* 상단 컨트롤 바 */
+  #controls {
+    position: fixed; left: 0; right: 0; top: 0;
+    display: flex; gap: 12px; align-items: center;
+    padding: 10px 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,.7), rgba(0,0,0,.35));
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+  }
+  #playBtn {
+    padding: 6px 12px; border-radius: 8px; border: 0;
+    background: #21c7ff; color: #001018; font-weight: 700; cursor: pointer;
+  }
+  #timeLabel { min-width: 120px; opacity: .9; }
+  #slider { flex: 1; accent-color: #21c7ff; }
+  #speed {
+    border-radius: 8px; border: 0; padding: 6px 10px; background: #16243c; color: #cfe8ff;
+  }
+
+  /* HUD (우상단 상태/확률) */
+  #hud {
+    position: fixed; right: 10px; top: 56px;
+    background: rgba(0,0,0,.55); padding: 8px 10px; border-radius: 8px;
+    font: 14px/1.35 monospace; transition: opacity .25s ease; z-index: 900;
+  }
+
+  /* 스테이지: 배경+아이콘을 비율 유지로 중앙 배치 */
+  #stageWrap {
+    position: absolute; inset: 0; display: grid; place-items: center;
+  }
+  #stage {
+    position: relative; width: var(--stage-w); height: var(--stage-h);
+    transform-origin: top left; /* 스케일 적용 기준 */
+    box-shadow: 0 10px 40px rgba(0,0,0,.45);
+    background: #0b1628;
+  }
+  #bg {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    object-fit: contain; opacity: .96; border-radius: 6px;
+  }
+  .sensor {
+    position: absolute; width: 64px; height: 64px;
+    opacity: .35; transition: transform .25s, opacity .25s, filter .25s;
+    filter: drop-shadow(0 0 5px #00ffffaa); cursor: pointer;
+  }
+  .sensor.active {
+    opacity: 1;
+    animation: blink .7s ease-in-out infinite alternate;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 12px #26e0ffaa);
+  }
+  @keyframes blink {
+    from { filter: brightness(.9) drop-shadow(0 0 6px #26e0ffaa); }
+    to   { filter: brightness(1.4) drop-shadow(0 0 14px #26e0ff); }
+  }
+
+  /* 모달(센서 클릭 팝업) */
+  #modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: none; align-items: center; justify-content: center; z-index: 2000;
+  }
+  #dialog {
+    width: min(92vw, 760px); background: #0e1c32; border: 1px solid #27466d;
+    border-radius: 12px; box-shadow: 0 20px 70px rgba(0,0,0,.6);
+    padding: 14px; color: #d9f0ff;
+  }
+  #dialogHeader {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;
+  }
+  #dialogTitle { font-weight: 700; }
+  #closeBtn {
+    border: 0; background: #203654; color: #cfe8ff; border-radius: 8px; padding: 6px 10px; cursor: pointer;
+  }
+  #chart {
+    width: 100%; height: 320px; background: #0a1729; border-radius: 8px;
+  }
+
+  /* 하단 도움말 */
+  #legend {
+    position: fixed; left: 10px; bottom: 10px; color: #b7cde4;
+    background: rgba(0,0,0,.4); padding: 6px 8px; border-radius: 6px; font: 12px/1.35 monospace;
+  }
+</style>
+</head>
+<body>
+  <!-- 상단 컨트롤 -->
+  <div id="controls">
+    <button id="playBtn">▶ 재생</button>
+    <input id="slider" type="range" min="0" max="0" value="0" />
+    <div id="time
