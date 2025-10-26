@@ -129,7 +129,7 @@
     {
       "firstgid": 1,
       "name": "icons",
-      "image": "https://adventuretestfordemo.netlify.app/web/assets/icons/icons_2x2.png",
+      "image": "../assets/icons/icons_2x2.png",
       "imagewidth": 64,
       "imageheight": 64,
       "tilewidth": 32,
